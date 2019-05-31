@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>My Chat App</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
+
+</head>
+<body>
+<style>
+    .chatBox {
+        margin: auto;
+        width: 50%;
+        border: 3px solid black;
+        padding: 10px;
+        height: 800px;
+        width: 800px;
+    }
+
+    .center {
+        margin: auto;
+        width: 50%;
+        padding: 10px;
+        height: 50px;
+        width: 800px;
+
+    }
+</style>
+
+
+<div align="center">
+    <h1>Welcome, <h1 id="user">{{ username }}</h1></h1>
+</div>
+
+
+<div class="chatBox" id="chatWindow"></div>
+
+
+<div class="center">
+    <form>
+        <input class="material-icons" type="button" id="submit" value="send" style="float: right">
+        <div style="overflow: hidden; padding-right: .5em;">
+            <input type="text" class="form-control" id="msg" style="width: 100%">
+        </div>
+    </form>
+</div>
+​
+
+</body>
+</html>
+
+<script>
+    //var username = document.getElementById('user').innerText
+    let username = "Justin"
+    let message
+    let message_list = ""
+    let socket = io.connect('http://' + document.domain + ':' + location.port);
+
+    document.getElementById('submit').onclick = function () {
+        message = document.getElementById('msg').value
+
+        socket.emit('send message', {
+            username: username,
+            message: message
+        })
+    }
+
+
+    socket.on('send response', function (msg) {
+        console.log(msg)
+        message_list += msg.username + ": " + msg.message + "\n"
+        $('#chatWindow').text(message_list);
+    })
+</script>
