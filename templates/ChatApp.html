@@ -55,14 +55,13 @@
 </html>
 
 <script>
-    //var username = document.getElementById('user').innerText
-    let username = "Justin"
-    let message
-    let message_list = ""
+    var username = document.getElementById('user').innerText
+    //let username = "Justin"
+    let message_list = []
     let socket = io.connect('http://' + document.domain + ':' + location.port);
 
     document.getElementById('submit').onclick = function () {
-        message = document.getElementById('msg').value
+        let message = document.getElementById('msg').value
 
         socket.emit('send message', {
             username: username,
@@ -73,7 +72,8 @@
 
     socket.on('send response', function (msg) {
         console.log(msg)
-        message_list += msg.username + ": " + msg.message + "\n"
-        $('#chatWindow').text(message_list);
+        console.log("HELLO")
+        message_list.append(msg.username + ": " + msg.message)
+        $('#chatWindow').text("asd");
     })
 </script>
