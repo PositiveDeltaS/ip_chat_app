@@ -14,11 +14,8 @@
         width: 50%;
         left: 80px;
         top: 120px;
-        border: 3px solid black;
-        padding-left: 80px;
         height: 200px;
         width: 300px;
-        background-color: lightsalmon;
 
     }
     .userlist {
@@ -27,12 +24,15 @@
         left: 80px;
         top: 340px;
         width: 50%;
-        border: 3px solid black;
         padding-top: 20px;
         height: 200px;
         width: 300px;
-        background-color: lightyellow;
     }
+
+    .sidePanelContainer {
+        background-color: #3E0E40;
+    }
+
     .chatinput{
         margin: auto;
         position: fixed;
@@ -43,4 +43,10 @@
         height: 50px;
         width: 300px;
 
+    }
+
+    .leftpanelitem {
+      border: none;
+      padding: 0;
+      background: none;
     }
