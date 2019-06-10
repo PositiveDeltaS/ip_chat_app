@@ -5,9 +5,13 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'mysecret'
 socketio = SocketIO(app)
 
-roomlist = []
 connected_users = { 'username': [], 'roomname': []}
 
+
+messageList = {'username': [], 'message': [], 'destination': []}
+serverState = {'username': [], 'roomname': ['general'] }
+userListArray = []
+roomListArray = ["general"]
 
 @app.route('/')
 def index():
@@ -20,25 +24,30 @@ def chat():
     return render_template('ChatApp.html', username=the_username)
 
 
-@socketio.on('join')
+@socketio.on('join server')
 def on_join(data):
     print ("user joined room...")
-    join_room(data['room'])
-    connected_users['username'].append(data['username'])
-    connected_users['roomname'].append(data['room'])
-    print(data['username'] + ' has entered room: ' + data['room'])
-    socketio.emit('send userlist', connected_users)
+    join_room('general')
+    if data['username'] not in serverState['username']:
+        serverState['username'].append(data['username'])
+    socketio.emit('send server state', serverState)
 
-@socketio.on('send message')
-def event_handler(json, methods=['GET', 'POST']):
-    socketio.emit('send response', json)
 
 @socketio.on('new chat')
-def create_chat(data):
-    if data.room not in roomlist:
-        print("added " + data.room + " to room list")
-        roomlist.append(data.room)
-    socketio.emit('send roomlist', data)
+def new_chat(data):
+    print ("user created room: " + data['roomname'])
+    if data['roomname'] not in serverState['roomname']:
+        serverState['roomname'].append(data['roomname'])
+    socketio.emit('send server state', serverState)
+
+
+@socketio.on('send message')
+def new_message(data):
+    messageList['username'].append(data['username'])
+    messageList['message'].append(data['message'])
+    messageList['destination'].append(data['destination'])
+    socketio.emit('send message response', messageList)
+
 
 if __name__ == '__main__':
     socketio.run(app, debug = True)

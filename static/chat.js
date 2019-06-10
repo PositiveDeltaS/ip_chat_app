@@ -1,6 +1,6 @@
 let username = document.getElementById('user').innerText
 let socket = io.connect('http://' + document.domain + ':' + location.port);
-let userlist = [];
+//let userlist = [];
 var roomlist = ["general"];
 //let userlist = ["kelsey", "justin", "nick", "matt"]
 let currentroom = "general";
@@ -21,7 +21,7 @@ function newGroupChat() {
     roomlist.push(new_chat)
 
     socket.emit('new chat', {
-        room: currentroom
+        room: currentroom,
     })
 
 
@@ -43,7 +43,7 @@ function switchRooms (val) {
     $('#chatWindow').empty();
     currentroom = val;
     $('#chattingIn').text("Now chatting in: " + currentroom);
-    socket.emit('join', {
+    socket.emit('alt join', {
         username: username,
         room: currentroom
     })
@@ -67,12 +67,13 @@ function updateUserlist (userlist) {
     let alreadySeen = [];
 
     for(let i = 0; i < userlist.length; i++){
-        let theuser = userlist[i];
-        console.log(theuser);
-        let temp = '<div><input type="button" class="leftpanelitem" id="user_name"  value="user_name" onclick="switchRooms(this.value)"></div>'
-        temp = temp.replace("user_name", theuser);
-        temp = temp.replace("user_name", theuser);
-        $('#userList').append( temp );
+        if(alreadySeen.includes(userlist[i]) === false){
+            let theuser = userlist[i];
+            let temp = '<div><input type="button" class="leftpanelitem" id="user_name"  value="user_name" onclick="switchRooms(this.value)"></div>'
+            temp = temp.replace("user_name", theuser);
+            temp = temp.replace("user_name", theuser);
+            $('#userList').append( temp );
+        }
     }
 }
 
@@ -93,11 +94,6 @@ function updateRoom (userlist) {
     }
 }
 
-function updateState(usersAndRooms) {
-    updateUserlist(usersAndRooms['userlist']);
-}
-
-
 socket.on('connect', () => {
     socket.emit('join', {
         username: username,
@@ -117,9 +113,9 @@ document.getElementById('submit').onclick = function () {
 }
 
 socket.on('send userlist', function (msg) {
-    //updateUserlist(msg['username']);
-    //updateRoomlist(msg['roomname']);
-    updateState(msg);
+    updateUserlist(msg['username']);
+    updateRoom(msg['roomname']);
+    console.log(msg['username'].length);
 })
 
 socket.on('send response', function (msg) {
