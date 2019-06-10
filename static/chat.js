@@ -1,13 +1,11 @@
 let username = document.getElementById('user').innerText
-let message_list = []
 let socket = io.connect('http://' + document.domain + ':' + location.port);
-
-var roomlist = ["general"]
-let userlist = ["kelsey", "justin", "nick", "matt"]
-let currentroom = "general"
+let userlist = [];
+var roomlist = ["general"];
+//let userlist = ["kelsey", "justin", "nick", "matt"]
+let currentroom = "general";
 
 let allmessages = { 'username': [], 'message': [], 'destination': []}
-
 
 
 function roomsInitialState() {
@@ -15,18 +13,23 @@ function roomsInitialState() {
     let new_group_chat_button = '<div><input type="button" value="+" onclick="newGroupChat()"></div>'
     $('#chatRoomList').append(new_group_chat_text)
     $('#chatRoomList').append(new_group_chat_button)
-    addChatroom(roomlist[0])
+    //addChatroom(roomlist[0])
 }
 
 function newGroupChat() {
-    console.log($('#newGroupChatText').val())
     let new_chat = $('#newGroupChatText').val()
     roomlist.push(new_chat)
+
+    socket.emit('new chat', {
+        room: currentroom
+    })
+
+
     addChatroom(roomlist[roomlist.length-1])
 }
 
 
-roomsInitialState()
+roomsInitialState();
 
 function addChatroom(theroom) {
     console.log(theroom)
@@ -36,22 +39,14 @@ function addChatroom(theroom) {
     $('#chatRoomList').append( temp );
 }
 
-
-$('#charRoomList').append()
-
-for(let i = 0; i < userlist.length; i++){
-    let theuser = userlist[i]
-    console.log(theuser)
-    let temp = '<div><input type="button" class="leftpanelitem" id="user_name"  value="user_name" onclick="switchRooms(this.value)"></div>'
-    temp = temp.replace("user_name", theuser);
-    temp = temp.replace("user_name", theuser);
-    $('#userList').append( temp );
-}
-
 function switchRooms (val) {
     $('#chatWindow').empty();
     currentroom = val;
     $('#chattingIn').text("Now chatting in: " + currentroom);
+    socket.emit('join', {
+        username: username,
+        room: currentroom
+    })
     printMessagesToChat();
 }
 
@@ -66,6 +61,42 @@ function printMessagesToChat() {
     }
 }
 
+function updateUserlist (userlist) {
+    $('#userList').empty();
+
+    let alreadySeen = [];
+
+    for(let i = 0; i < userlist.length; i++){
+        let theuser = userlist[i];
+        console.log(theuser);
+        let temp = '<div><input type="button" class="leftpanelitem" id="user_name"  value="user_name" onclick="switchRooms(this.value)"></div>'
+        temp = temp.replace("user_name", theuser);
+        temp = temp.replace("user_name", theuser);
+        $('#userList').append( temp );
+    }
+}
+
+function updateRoom (userlist) {
+    $('#chatRoomList').empty();
+    roomsInitialState();
+
+    let alreadySeen = [];
+
+    for(let i = 0; i < userlist.length; i++){
+        if(alreadySeen.includes(userlist[i]) === false){
+            alreadySeen.push(userlist[i]);
+            addChatroom(userlist[i]);
+        }
+        else {
+            console.log("already seen");
+        }
+    }
+}
+
+function updateState(usersAndRooms) {
+    updateUserlist(usersAndRooms['userlist']);
+}
+
 
 socket.on('connect', () => {
     socket.emit('join', {
@@ -73,14 +104,6 @@ socket.on('connect', () => {
         room: currentroom
     })
 })
-
-/*document.getElementById('joinroom').onclick = () => {
-    socket.emit('join', {
-        username: username,
-        room: document.getElementById('roomname').value
-    })
-}*/
-
 
 document.getElementById('submit').onclick = function () {
     let new_message = document.getElementById('msg').value
@@ -93,6 +116,11 @@ document.getElementById('submit').onclick = function () {
     })
 }
 
+socket.on('send userlist', function (msg) {
+    //updateUserlist(msg['username']);
+    //updateRoomlist(msg['roomname']);
+    updateState(msg);
+})
 
 socket.on('send response', function (msg) {
     //message_list.push(msg.username + ": " + msg.message)
@@ -101,4 +129,8 @@ socket.on('send response', function (msg) {
     allmessages['destination'].push(msg.destination);
 
     printMessagesToChat();
+})
+
+socket.on('send roomlist', function (msg) {
+    console.log(msg);
 })
