@@ -82,7 +82,7 @@ document.getElementById('submit').onclick = () => {
         username: username,
         message: new_message,
         destination: currentroom
-    })
+    });
 }
 
 function listMessages(msg) {
@@ -93,4 +93,13 @@ function listMessages(msg) {
         else
             console.log("nope")
     }
+}
+
+$('#chattingIn').append('<input class="btn btn-primary" type="submit" id="leave_server" value="Leave Server" align="right">')
+
+document.getElementById('leave_server').onclick = function(){
+    socket.emit('leave server', {
+        username: username,
+    });
+    location.replace("http://127.0.0.1:5000/")
 }

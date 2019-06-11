@@ -48,6 +48,10 @@ def new_message(data):
     messageList['destination'].append(data['destination'])
     socketio.emit('send message response', messageList)
 
+@socketio.on('leave server')
+def leave_server(data):
+    leave_room('general')
+
 
 if __name__ == '__main__':
     socketio.run(app, debug = True)
